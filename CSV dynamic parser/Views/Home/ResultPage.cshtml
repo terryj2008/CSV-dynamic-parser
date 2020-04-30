@@ -1,0 +1,59 @@
+﻿@using CSV_dynamic_parser.Models
+
+@{
+    ViewBag.Title = "ResultPage";
+}
+
+<h3>ResultPage</h3>
+<head>
+    <title>ResultPage</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round|Open+Sans">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <style type="text/css">
+        body {
+            color: #404E67;
+            background: #F5F7FA;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .table-wrapper {
+            margin: 30px auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 1px 1px rgba(0,0,0,.05);
+        }
+
+        .btnAlignRight {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="table-wrapper">
+        <div class="table-wrapper">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        @foreach (ExcelViewModel e in ViewBag.Columns)
+                        {
+                            <th>@e.columnName</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < ViewBag.rowCount; i++)
+                    {
+                        <tr>
+                            @foreach (ExcelViewModel e in ViewBag.Columns)
+                            {
+                                <td>@e.columnValue[i]</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>

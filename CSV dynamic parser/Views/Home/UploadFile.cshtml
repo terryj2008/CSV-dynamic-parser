@@ -1,0 +1,163 @@
+﻿@using CSV_dynamic_parser.Models
+
+@{
+    ViewBag.Title = "UploadFile";
+}
+
+<h3>UploadFile</h3>
+<head>
+    <title>Fields configuration</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round|Open+Sans">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <style type="text/css">
+        body {
+            color: #404E67;
+            background: #F5F7FA;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .table-wrapper {
+            margin: 30px auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 1px 1px rgba(0,0,0,.05);
+        }
+
+        .btnAlignRight {
+            text-align: right;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            var actions = $("table td:last-child").html();
+            // Append table rows
+            $(".add-new").click(function () {
+                $(this).attr("disabled", "disabled");
+                var index = $("table tbody tr:last-child").index();
+                var row = '<tr>' +
+                    '<td><input type="text" class="form-control" name="name" id="name"></td>' +
+                    '<td><input type="text" class="form-control" name="department" id="datatype"></td>' +
+                    '<td><input type="text" class="form-control" name="size" id="size"></td>' +
+                    '<td><input type="checkbox" class="form-cbx" name="required" id="required"></td>' +
+                    '<td>' + actions + '</td>' +
+                    '</tr>';
+                $("table").append(row);
+                $("table tbody tr").eq(index + 1).find(".add, .edit").toggle();
+                $('[data-toggle="tooltip"]').tooltip();
+            });
+            // Add new
+            $(document).on("click", ".add", function () {
+                var empty = false;
+                var input = $(this).parents("tr").find('input[type="text"]');
+                input.each(function () {
+                    if (!$(this).val()) {
+                        $(this).addClass("error");
+                        empty = true;
+                    } else {
+                        $(this).removeClass("error");
+                    }
+                });
+                $(this).parents("tr").find(".error").first().focus();
+                if (!empty) {
+                    input.each(function () {
+                        $(this).parent("td").html($(this).val());
+                    });
+                    $(this).parents("tr").find(".add, .edit").toggle();
+                    $(".add-new").removeAttr("disabled");
+                }
+            });
+            // Edit
+            $(document).on("click", ".edit", function () {
+                $(this).parents("tr").find("td:not(:last-child)").each(function (index, value) {
+                    if (index == 3) {
+                        var checked = value.childNodes[0].checked;
+                        if (checked) {
+                            $(this).html('<input type="checkbox" checked="checked" class="form-cbx">');
+                        }
+                        else {
+                            $(this).html('<input type="checkbox" class="form-cbx">');
+                        }
+                    }
+                    else {
+                        $(this).html('<input type="text" class="form-control" value="' + $(this).text() + '">');
+                    }
+                });
+                $(this).parents("tr").find(".add, .edit").toggle();
+                $(".add-new").attr("disabled", "disabled");
+            });
+            // Delete
+            $(document).on("click", ".delete", function () {
+                $(this).parents("tr").remove();
+                $(".add-new").removeAttr("disabled");
+            });
+            // Next1
+            $(document).on("click", ".next1", function () {
+                var list = [];
+                $("select[name$='DropDownItems']").each(function () {
+                    var item = $(this).find("option:selected").text();
+                    if (item != "<skip>") {
+                        list.push(item);
+                    }
+                    else {
+                        if (item!="") {
+                            list.push("not selected");
+                        }
+                    }
+                });
+                $.post("@Url.Action("SaveOne")", "list=" + JSON.stringify(list), function (text, status) {
+                    Console.log("SaveOne successfully");
+                 });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="table-wrapper">
+        @using (Html.BeginForm("UploadFile", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <div>
+                @Html.TextBox("file", "", new { type = "file" }) <br />
+
+                <input type="submit" value="Upload" />
+
+                @ViewBag.Message
+
+            </div>
+        }
+
+        <div class="table-wrapper">
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="col-md-6"><h5><b>Input File</b></h5></div>
+                        <div class="col-md-6"><h5><b>Mapping</b></h5></div>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-bordered">
+                <tbody>
+                    @foreach (Column c in ViewBag.Headers)
+                    {
+                        <tr>
+                            <td>
+                                @c.Name
+                            </td>
+                            <td>
+                                @Html.DropDownList("DropDownItems", "<skip>")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-12" style="margin-top:30px;">
+            <div class="col-md-8"></div>
+            <div class="col-md-4 btnAlignRight">
+                <button type="button" class="btn btn-success next1" style="">@Html.ActionLink("Next", "ResultPage", "Home")</button>
+            </div>
+        </div>
+    </div>
+</body>
